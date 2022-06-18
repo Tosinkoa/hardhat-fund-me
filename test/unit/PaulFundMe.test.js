@@ -9,6 +9,7 @@ describe("PaulFundMe", async () => {
     deployer = (await getNamedAccounts()).deployer;
     await deployments.fixture(["all"]);
     paulFundMe = await ethers.getContract("PaulFundMe", deployer);
+
     MockV3Aggregator = await ethers.getContract("MockV3Aggregator", deployer);
   });
 
