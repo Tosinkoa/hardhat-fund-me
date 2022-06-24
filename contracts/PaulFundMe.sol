@@ -13,10 +13,10 @@ contract PaulFundMe {
     using PaulPriceConverter for uint256;
     // State Variables
     uint256 public MINIMUM_USD = 50 * 1e18;
-    address[] public funders;
-    mapping(address => uint256) public mapAddressToAmountFunded;
-    address public immutable i_owner;
-    AggregatorV3Interface public priceFeed;
+    address[] private s_funders;
+    mapping(address => uint256) private s_mapAddressToAmountFunded;
+    address private immutable i_owner;
+    AggregatorV3Interface public s_priceFeed;
 
     //Modifiers
     modifier onlyi_Owner() {
@@ -26,37 +26,32 @@ contract PaulFundMe {
         _;
     }
 
-    // Functions Order:
-    //// constructor
-    //// receive
-    //// fallback
-    //// external
-    //// public
-    //// internal
-    //// private
-    //// view / pure
-
     constructor(address priceFeedAddress) {
         i_owner = msg.sender;
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
+        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     function fund() public payable {
         require(
-            msg.value.getConversion(priceFeed) >= MINIMUM_USD,
+            msg.value.getConversion(s_priceFeed) >= MINIMUM_USD,
             "Didn't send enough"
         );
-        funders.push(msg.sender);
-        mapAddressToAmountFunded[msg.sender] += msg.value;
+
+        s_mapAddressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
     }
 
-    function Withdraw() public onlyi_Owner {
-        for (uint256 funderIndex; funderIndex < funders.length; funderIndex++) {
-            address funder = funders[funderIndex];
-            mapAddressToAmountFunded[funder] = 0;
+    function withdraw() public onlyi_Owner {
+        for (
+            uint256 funderIndex;
+            funderIndex < s_funders.length;
+            funderIndex++
+        ) {
+            address funder = s_funders[funderIndex];
+            s_mapAddressToAmountFunded[funder] = 0;
         }
         //-------------Reseting the array----------------
-        funders = new address[](0);
+        s_funders = new address[](0);
 
         //----------------Withdrawing funds------------------
         (bool callSuccess, ) = payable(msg.sender).call{
@@ -65,5 +60,42 @@ contract PaulFundMe {
         if (!callSuccess) {
             revert PaulFundMe__CallFailed();
         }
+    }
+
+    function cheaperWithdraw() public payable onlyi_Owner {
+        address[] memory funders = s_funders;
+        //mapping can't be in memeory
+
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < funders.length;
+            funderIndex++
+        ) {
+            address funder = funders[funderIndex];
+            s_mapAddressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        require(success);
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
+
+    function getFunders(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
+
+    function getMapAddressToAmountFunded(address funder)
+        public
+        view
+        returns (uint256)
+    {
+        return s_mapAddressToAmountFunded[funder];
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
     }
 }

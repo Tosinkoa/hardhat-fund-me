@@ -28,12 +28,12 @@ module.exports = {
     },
   },
   gasReporter: {
-    enabled: false,
+    enabled: true,
     currency: "USD",
     outputFile: "gas-report.txt",
     noColors: "true",
     coinmarketcap: process.env.COIN_MARKET_API,
-    token: "MATIC",
+    token: "ETH",
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

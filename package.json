@@ -1,4 +1,15 @@
 {
+  "name": "hardhat-fund-me",
+  "author": "Paul Ojo",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npm hardhat test",
+    "test:staging": "npx hardhat test --network rinkeby",
+    "lint": "npx solhint 'contracts/*.sol'",
+    "lint:fix": "npx solhint 'contract/*.sol --fix'",
+    "format": "npx prettier --write .'",
+    "coverage": "npx hardhat coverage"
+  },
   "dependencies": {
     "@chainlink/contracts": "^0.4.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",

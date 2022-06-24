@@ -19,6 +19,7 @@ library PaulPriceConverter {
         returns (uint256)
     {
         uint256 ethPrice = getPrice(priceFeed);
-        return (ethPrice * ethAmount) / 1e18;
+        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1e18;
+        return ethAmountInUsd;
     }
 }
